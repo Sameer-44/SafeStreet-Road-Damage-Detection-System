@@ -180,6 +180,7 @@ const Admin = () => {
     recent: false
   });
   
+  
   // Fetch user-specific report statistics
   useEffect(() => {
     const fetchReportStats = async () => {

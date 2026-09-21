@@ -34,7 +34,7 @@ const SignupPage = () => {
   const sendOtpEmail = async (otpCode) => {
     try {
       // Log the OTP to the console for debugging
-      console.log(`OTP for ${email}: ${otpCode}`);
+      console.log(`OTP for ${email}: ${otCode}`);
       
       // Prepare the template parameters with common parameter names
       const templateParams = {
