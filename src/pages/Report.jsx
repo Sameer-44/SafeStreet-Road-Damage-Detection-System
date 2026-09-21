@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef, useMemo } from "react";
-import { Download, Loader2, AlertCircle, MapPin, CalendarDays as Calendar, FileText, Bell, CheckCircle, X, Map, Filter, Search, SlidersHorizontal, Tag, Clock, ArrowUpDown, ChevronDown, ChevronUp } from "lucide-react";
+import { Download, Loader2, AlertCircle, MapPin, CalendarDays as Calendar, FileText, Bell, CheckCircle, X, Map, Filter, Search, SlidersHorizontal, Tag, Clock, ArrowUpDown, ChevronDown, ChevronUp, Trash2 } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
 // Import jsPDF directly - no dynamic imports
@@ -40,6 +40,8 @@ const Report = () => {
     recommendedAction: ''
   });
   const [showReviewModal, setShowReviewModal] = useState(false);
+  const [deleteModal, setDeleteModal] = useState({ open: false, entryId: null, entryName: null });
+  const [deleting, setDeleting] = useState(false);
   
   // Get user info from localStorage on component mount
   useEffect(() => {
@@ -308,6 +310,51 @@ const Report = () => {
       alert("This entry doesn't have location coordinates to display on the map.");
     }
   };
+  
+  // Open delete confirmation modal
+  const handleDeleteClick = (entry) => {
+    setDeleteModal({
+      open: true,
+      entryId: entry._id,
+      entryName: entry.address || `Report ${entry._id.substring(0, 8)}`
+    });
+  };
+  
+  // Handle delete confirmation
+  const handleDeleteConfirm = async () => {
+    if (!deleteModal.entryId || deleting) return;
+    
+    try {
+      setDeleting(true);
+      
+      // Make API call to delete the entry
+      const response = await fetch(`http://localhost:5000/api/road-entries/${deleteModal.entryId}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Failed to delete entry: ${response.status} ${response.statusText}`);
+      }
+      
+      // Remove the entry from the state
+      setEntries(prevEntries => prevEntries.filter(entry => entry._id !== deleteModal.entryId));
+      
+      // Close the modal
+      setDeleteModal({ open: false, entryId: null, entryName: null });
+      
+      // Show success message (you could add a toast notification here)
+      console.log(`Successfully deleted entry ${deleteModal.entryId}`);
+      
+    } catch (error) {
+      console.error("Error deleting entry:", error);
+      alert(`Failed to delete entry: ${error.message}`);
+    } finally {
+      setDeleting(false);
+    }
+  };
 
   const handleDownload = async (entry, index) => {
     const { imagePath, latitude, longitude, address, timestamp, severity, status, damageType } = entry;
@@ -387,7 +434,7 @@ const Report = () => {
             // Add the logo multiple times as a pattern across the page with slightly increased opacity
             doc.setGState(new doc.GState({ opacity: 0.12 }));
             for (let y = 40; y < 280; y += 100) {
-              for (let x = 20; x < 180; x += 100) {
+              for (let x = 2; x < 180; x += 100) {
                 doc.addImage(logoBase64, 'PNG', x, y, 60, 60);
               }
             }
@@ -762,7 +809,7 @@ const Report = () => {
           <p className="text-gray-600 text-center">{error}</p>
           <button 
             onClick={() => window.location.reload()}
-            className="mt-6 w-full bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-lg transition-colors"
+            className="mt-6 w-full bg-blue-500 hover:bg-blue-600 text-black font-medium py-2 px-4 rounded-lg transition-colors"
           >
             Retry
           </button>
@@ -1047,7 +1094,7 @@ const Report = () => {
               </h3>
               <button 
                 onClick={() => setShowReviewModal(false)}
-                className="text-gray-400 hover:text-gray-500 transition-colors"
+                className="text-gray-400 hover:text-black-500 transition-colors"
               >
                 <X className="h-5 w-5" />
               </button>
@@ -1076,7 +1123,7 @@ const Report = () => {
                   )}
                   
                   {/* Overlay with image info */}
-                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-3 text-white">
+                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-3 text-black">
                     <p className="text-sm font-medium">ID: {entry._id?.substring(0, 8) || 'N/A'}</p>
                   </div>
                 </div>
@@ -1085,8 +1132,8 @@ const Report = () => {
                   <div className="bg-gray-50 p-3 rounded-lg flex items-start">
                     <MapPin className="h-5 w-5 text-blue-500 mt-0.5 flex-shrink-0" />
                     <div className="ml-2">
-                      <p className="text-sm font-medium text-gray-700">Location</p>
-                      <p className="text-sm text-gray-600">{entry.address || 'Address not available'}</p>
+                      <p className="text-sm font-medium text-gray-900">Location</p>
+                      <p className="text-sm text-gray-800">{entry.address || 'Address not available'}</p>
                     </div>
                   </div>
                   
@@ -1095,16 +1142,16 @@ const Report = () => {
                       <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
                     </svg>
                     <div className="ml-2">
-                      <p className="text-sm font-medium text-gray-700">Coordinates</p>
-                      <p className="text-sm text-gray-600 font-mono">{entry.latitude || 'N/A'}, {entry.longitude || 'N/A'}</p>
+                      <p className="text-sm font-medium text-gray-900">Coordinates</p>
+                      <p className="text-sm text-gray-800 font-mono">{entry.latitude || 'N/A'}, {entry.longitude || 'N/A'}</p>
                     </div>
                   </div>
                   
                   <div className="bg-gray-50 p-3 rounded-lg flex items-start">
                     <Calendar className="h-5 w-5 text-blue-500 mt-0.5 flex-shrink-0" />
                     <div className="ml-2">
-                      <p className="text-sm font-medium text-gray-700">Detected</p>
-                      <p className="text-sm text-gray-600">{new Date(entry.timestamp).toLocaleString()}</p>
+                      <p className="text-sm font-medium text-gray-900">Detected</p>
+                      <p className="text-sm text-gray-800">{new Date(entry.timestamp).toLocaleString()}</p>
                     </div>
                   </div>
                 </div>
@@ -1112,17 +1159,17 @@ const Report = () => {
               
               <div className="md:w-1/2 space-y-5">
                 <div className="bg-blue-50 p-4 rounded-lg mb-4">
-                  <h4 className="text-sm font-semibold text-blue-800 mb-2 flex items-center">
-                    <CheckCircle className="h-4 w-4 mr-1" />
+                  <h4 className="text-sm font-semibold text-gray-900 mb-2 flex items-center">
+                    <CheckCircle className="h-4 w-4 mr-1 text-blue-600" />
                     Review Information
                   </h4>
-                  <p className="text-xs text-blue-700">
+                  <p className="text-sm text-gray-800 font-medium">
                     Please review this road issue and provide your assessment. This information will be used to prioritize repairs.
                   </p>
                 </div>
                 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center">
+                  <label className="block text-sm font-medium text-gray-900 mb-1 flex items-center">
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
@@ -1131,7 +1178,7 @@ const Report = () => {
                   <select
                     value={reviewForm.status}
                     onChange={(e) => setReviewForm({...reviewForm, status: e.target.value})}
-                    className="w-full rounded-lg border border-gray-300 py-2.5 px-3 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 shadow-sm"
+                    className="w-full rounded-lg border border-gray-300 py-2.5 px-3 bg-white text-gray-900 font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 shadow-sm"
                   >
                     <option value="approved">Approved - Issue Confirmed</option>
                     <option value="rejected">Rejected - Not a Valid Issue</option>
@@ -1141,7 +1188,7 @@ const Report = () => {
                 </div>
                 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center">
+                  <label className="block text-sm font-medium text-gray-900 mb-1 flex items-center">
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
                     </svg>
@@ -1231,14 +1278,14 @@ const Report = () => {
                           </span>
                         </div>
                         <div>
-                          <span className="font-medium text-gray-700">Processing:</span>
-                          <span className="ml-1 text-gray-600">
+                          <span className="font-medium text-gray-900">Processing:</span>
+                          <span className="ml-1 text-gray-800">
                             {entry.analysisResult.processing_time || entry.analysisResult.clientProcessingTime || 'N/A'} sec
                           </span>
                         </div>
                         <div>
-                          <span className="font-medium text-gray-700">Model:</span>
-                          <span className="ml-1 text-gray-600">YOLOv8</span>
+                          <span className="font-medium text-gray-900">Model:</span>
+                          <span className="ml-1 text-gray-800">YOLOv8</span>
                         </div>
                       </div>
                     </div>
@@ -1246,7 +1293,7 @@ const Report = () => {
                 )}
                 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center">
+                  <label className="block text-sm font-medium text-gray-900 mb-1 flex items-center">
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                     </svg>
@@ -1274,7 +1321,7 @@ const Report = () => {
                 </div>
                 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center">
+                  <label className="block text-sm font-medium text-gray-900 mb-1 flex items-center">
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 11.5V14m0-2.5v-6a1.5 1.5 0 113 0m-3 6a1.5 1.5 0 00-3 0v2a7.5 7.5 0 0015 0v-5a1.5 1.5 0 00-3 0m-6-3V11m0-5.5v-1a1.5 1.5 0 013 0v1m0 0V11m0-5.5a1.5 1.5 0 013 0v3m0 0V11" />
                     </svg>
@@ -1291,7 +1338,7 @@ const Report = () => {
                           recommendedAction: newValue
                         }));
                       }}
-                      className="w-full rounded-lg border border-gray-300 py-2.5 px-3 pl-9 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 shadow-sm"
+                      className="w-full rounded-lg border border-gray-300 py-2.5 px-3 pl-9 text-gray-900 font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 shadow-sm"
                       placeholder="e.g., Patch pothole, Resurface road section"
                     />
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -1341,7 +1388,7 @@ const Report = () => {
                 </div>
                 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center">
+                  <label className="block text-sm font-medium text-gray-900 mb-1 flex items-center">
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                     </svg>
@@ -1368,7 +1415,7 @@ const Report = () => {
                       }}
                       rows={4}
                       placeholder="Add any additional notes about this road issue..."
-                      className="w-full rounded-lg border border-gray-300 py-2.5 px-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 shadow-sm"
+                      className="w-full rounded-lg border border-gray-300 py-2.5 px-3 text-gray-900 font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 shadow-sm"
                       id="review-notes"
                       name="review-notes"
                       style={{ resize: 'vertical', minHeight: '100px' }}
@@ -1429,8 +1476,58 @@ const Report = () => {
               onClick={handleReviewSubmit}
               className="px-4 py-2.5 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 rounded-lg text-white font-medium shadow-sm hover:shadow transition-all flex items-center justify-center"
             >
-              <CheckCircle className="h-4 w-4 mr-2" />
+              <CheckCircle className="h-4 w-4 mr-2 text-white" />
               Submit Review & Notify
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  // Delete Confirmation Modal
+  const DeleteConfirmationModal = () => {
+    if (!deleteModal.open) return null;
+    
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
+          <div className="text-center">
+            <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 mb-4">
+              <AlertCircle className="h-6 w-6 text-red-600" />
+            </div>
+            <h3 className="text-lg font-medium text-gray-900 mb-2">Confirm Deletion</h3>
+            <p className="text-sm text-gray-500 mb-6">
+              Are you sure you want to delete this report? <br />
+              <span className="font-medium text-gray-700">{deleteModal.entryName}</span><br />
+              This action cannot be undone.
+            </p>
+          </div>
+          
+          <div className="flex justify-end gap-3">
+            <button
+              onClick={() => setDeleteModal({ open: false, entryId: null, entryName: null })}
+              className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-medium"
+              disabled={deleting}
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleDeleteConfirm}
+              className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium flex items-center"
+              disabled={deleting}
+            >
+              {deleting ? (
+                <>
+                  <Loader2 className="animate-spin mr-2 h-4 w-4" />
+                  Deleting...
+                </>
+              ) : (
+                <>
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  Delete
+                </>
+              )}
             </button>
           </div>
         </div>
@@ -1441,6 +1538,9 @@ const Report = () => {
   try {
     return (
       <div className="flex bg-gray-50 min-h-screen">
+        {/* Delete Confirmation Modal */}
+        <DeleteConfirmationModal />
+        
         {/* Sidebar Component */}
         <Sidebar activeTab={activeTab} userName={userName} userId={userId} />
         
@@ -1606,8 +1706,8 @@ const Report = () => {
                         <div className="flex items-start bg-gray-50 p-2 rounded-lg">
                           <MapPin className="h-5 w-5 text-blue-500 mt-0.5 flex-shrink-0" />
                           <div className="ml-2">
-                            <p className="text-sm font-medium text-gray-700">Location</p>
-                            <p className="text-sm text-gray-600 break-words">{entry.address || 'Address not available'}</p>
+                            <p className="text-sm font-medium text-gray-900">Location</p>
+                            <p className="text-sm text-gray-800 break-words">{entry.address || 'Address not available'}</p>
                           </div>
                         </div>
                   
@@ -1616,8 +1716,8 @@ const Report = () => {
                             <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
                           </svg>
                           <div className="ml-2">
-                            <p className="text-sm font-medium text-gray-700">Coordinates</p>
-                            <p className="text-sm text-gray-600 font-mono">
+                            <p className="text-sm font-medium text-gray-900">Coordinates</p>
+                            <p className="text-sm text-gray-800 font-mono">
                               {entry.latitude || 'N/A'}, {entry.longitude || 'N/A'}
                             </p>
                           </div>
@@ -1748,53 +1848,61 @@ const Report = () => {
                   )}
                 </div>
                 
-                <div className="flex flex-col gap-2 mt-4">
-                  <div className="flex flex-col sm:flex-row gap-2">
-                    <button
-                      onClick={() => handleDownload(entry, index)}
-                      disabled={downloadingIndex === index}
-                      className={`flex-1 flex items-center justify-center px-4 py-2.5 rounded-lg font-medium transition-all shadow-sm ${
-                        downloadingIndex === index 
-                          ? "bg-gray-300 text-gray-500 cursor-not-allowed" 
-                          : "bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white hover:shadow"
-                      }`}
-                    >
-                      {downloadingIndex === index ? (
-                        <>
-                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                          Generating PDF...
-                        </>
-                      ) : (
-                        <>
-                          <Download className="h-4 w-4 mr-2" />
-                          Download Report
-                        </>
-                      )}
-                    </button>
-                    
-                    <button
-                      onClick={() => handleViewOnMap(entry)}
-                      className="flex-1 flex items-center justify-center px-4 py-2.5 rounded-lg font-medium bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white transition-all shadow-sm hover:shadow"
-                    >
-                      <Map className="h-4 w-4 mr-2" />
-                      View on Map
-                    </button>
-                  </div>
+                <div className="grid grid-cols-2 gap-3 mt-4">
+                  {/* First row of buttons */}
+                  <button
+                    onClick={() => handleDownload(entry, index)}
+                    disabled={downloadingIndex === index}
+                    className={`flex items-center justify-center px-4 py-2.5 rounded-lg font-medium transition-all shadow-sm ${
+                      downloadingIndex === index 
+                        ? "bg-gray-300 text-gray-500 cursor-not-allowed" 
+                        : "bg-blue-600 hover:bg-blue-700 text-white hover:shadow"
+                    }`}
+                  >
+                    {downloadingIndex === index ? (
+                      <>
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        Generating...
+                      </>
+                    ) : (
+                      <>
+                        <Download className="h-4 w-4 mr-2 text-white" />
+                        Download
+                      </>
+                    )}
+                  </button>
                   
+                  <button
+                    onClick={() => handleViewOnMap(entry)}
+                    className="flex items-center justify-center px-4 py-2.5 rounded-lg font-medium bg-indigo-600 hover:bg-indigo-700 text-white transition-all shadow-sm hover:shadow"
+                  >
+                    <Map className="h-4 w-4 mr-2 text-white" />
+                    View on Map
+                  </button>
+                  
+                  {/* Second row of buttons */}
+                  <button
+                    onClick={() => handleDeleteClick(entry)}
+                    className="flex items-center justify-center px-4 py-2.5 rounded-lg font-medium bg-red-600 text-white hover:bg-red-700 transition-all shadow-sm"
+                  >
+                    <Trash2 className="h-4 w-4 mr-2 text-white" />
+                    Delete
+                  </button>
+                
                   <button
                     onClick={() => {
                       setReviewingId(entry._id);
                       setShowReviewModal(true);
                     }}
-                    className="w-full flex items-center justify-center px-4 py-2.5 rounded-lg font-medium bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white transition-all shadow-sm hover:shadow"
+                    className="flex items-center justify-center px-4 py-2.5 rounded-lg font-medium bg-green-600 hover:bg-green-700 text-white transition-all shadow-sm hover:shadow"
                   >
-                    <Bell className="h-4 w-4 mr-2" />
-                    Review & Notify
+                    <Bell className="h-4 w-4 mr-2 text-white" />
+                    Review
                   </button>
                 </div>
               </div>
             </div>
-                );
+          );
               }) : (
                 <div className="col-span-full text-center py-12">
                   <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
@@ -1819,7 +1927,7 @@ const Report = () => {
           </div>
         </div>
       </div>
-  );
+    );
   } catch (renderError) {
     console.error("Error rendering Report component:", renderError);
     return (
@@ -1837,7 +1945,7 @@ const Report = () => {
           </pre>
           <button 
             onClick={() => window.location.reload()}
-            className="mt-6 w-full bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 px-4 rounded-lg transition-colors"
+            className="mt-6 w-full bg-blue-500 hover:bg-blue-600 text-black font-medium py-2 px-4 rounded-lg transition-colors"
           >
             Refresh Page
           </button>
