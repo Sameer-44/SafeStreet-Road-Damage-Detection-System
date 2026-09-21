@@ -56,113 +56,45 @@ SafeStreet is an intelligent road damage detection and management system that le
 - MongoDB (local or cloud)
 - Git
 
-### Installation
-
-1. **Clone the Repository**
-   ```bash
-   git clone https://github.com/your-username/safestreet-road-damage-detection.git
-   cd safestreet-road-damage-detection
-   ```
-
-2. **Install Frontend Dependencies**
-   ```bash
-   npm install
-   ```
-
-3. **Install Backend Dependencies**
-   ```bash
-   cd BACKEND
-   npm install
-   ```
-
-4. **Install Python Dependencies**
-   ```bash
-   pip install -r BACKEND/requirements.txt
-   ```
-
-5. **Environment Configuration**
-   
-   Create `.env` file in the root directory:
-   ```env
-   # Database
-   MONGO_URI=mongodb://localhost:27017/Safestreet
-   
-   # Server
-   PORT=5000
-   NODE_ENV=development
-   
-   # JWT
-   JWT_SECRET=your-super-secret-jwt-key
-   
-   # Email Configuration
-   EMAIL_USER=your-email@gmail.com
-   EMAIL_PASS=your-app-password
-   
-   # Hugging Face (Optional)
-   HF_TOKEN=your-huggingface-token
-   ```
-
-6. **Start the Application**
-   
-   **Development Mode (Recommended):**
-   ```bash
-   # Terminal 1: Start Frontend
-   npm run dev
-   
-   # Terminal 2: Start Backend
-   cd BACKEND
-   npm start
-   ```
-   
-   **Production Mode:**
-   ```bash
-   npm run build
-   npm start
-   ```
-
-7. **Access the Application**
-   - Frontend: http://localhost:5173
-   - Backend API: http://localhost:5000
-   - Health Check: http://localhost:5000/health
 
 ## 📁 Project Structure
 
 ```
 safestreet/
-├── 📁 src/                          # Frontend React application
-│   ├── 📁 components/               # Reusable UI components
-│   │   ├── Navbar.jsx              # Navigation bar
-│   │   ├── Hero.jsx                # Landing page hero section
-│   │   ├── Features.jsx            # Features showcase
-│   │   ├── Dashboard.jsx           # Admin dashboard
-│   │   ├── MyMap.jsx               # Interactive map component
+├── 📁 src/                          
+│   ├── 📁 components/              
+│   │   ├── Navbar.jsx              
+│   │   ├── Hero.jsx                
+│   │   ├── Features.jsx            
+│   │   ├── Dashboard.jsx          
+│   │   ├── MyMap.jsx             
 │   │   └── ...
-│   ├── 📁 pages/                   # Page components
-│   │   ├── Upload.jsx              # Image upload and analysis
-│   │   ├── Admin.jsx               # Admin dashboard
-│   │   ├── AuthorityPage.jsx       # Municipal authority interface
-│   │   ├── MapView.jsx             # Map visualization
-│   │   ├── LoginPage.jsx           # User authentication
+│   ├── 📁 pages/                 
+│   │   ├── Upload.jsx              
+│   │   ├── Admin.jsx            
+│   │   ├── AuthorityPage.jsx       
+│   │   ├── MapView.jsx            
+│   │   ├── LoginPage.jsx          
 │   │   └── ...
-│   ├── 📁 utils/                   # Utility functions
-│   │   ├── apiHelper.js            # API communication helpers
-│   │   ├── apiConfig.js            # API configuration
+│   ├── 📁 utils/                   
+│   │   ├── apiHelper.js            
+│   │   ├── apiConfig.js           
 │   │   └── ...
-│   └── App.jsx                     # Main application component
-├── 📁 BACKEND/                     # Backend Node.js application
-│   ├── 📁 api/                     # API route handlers
-│   ├── 📁 models/                  # Database models and AI scripts
-│   │   ├── detect.py               # YOLO object detection
-│   │   ├── predict.py              # ViT classification
-│   │   ├── User.js                 # User model
+│   └── App.jsx                     
+├── 📁 BACKEND/                     
+│   ├── 📁 api/                     
+│   ├── 📁 models/                 
+│   │   ├── detect.py               
+│   │   ├── predict.py             
+│   │   ├── User.js                 
 │   │   └── ...
-│   ├── server.js                   # Main server file
-│   ├── huggingface_integration.py  # AI model integration
-│   └── requirements.txt            # Python dependencies
-├── 📁 temp_hf/                     # Hugging Face model cache
-├── 📁 public/                      # Static assets
-├── package.json                    # Frontend dependencies
-└── README.md                       # This file
+│   ├── server.js                   
+│   ├── huggingface_integration.py  
+│   └── requirements.txt            
+├── 📁 temp_hf/                     
+├── 📁 public/                      
+├── package.json                   
+└── README.md                      
 ```
 
 ## 🔧 API Endpoints
@@ -309,14 +241,6 @@ npm test
 python -m pytest tests/
 ```
 
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
 ### Development Guidelines
 - Follow ESLint configuration
 - Write meaningful commit messages
@@ -326,34 +250,3 @@ python -m pytest tests/
 ## 📝 License
 
 This project is licensed under the ISC License - see the [LICENSE](LICENSE) file for details.
-
-## 🙏 Acknowledgments
-
-- **Hugging Face** for model hosting and AI infrastructure
-- **OpenStreetMap** for mapping data
-- **MongoDB** for database services
-- **Vercel/Netlify** for deployment platforms
-
-## 📞 Support
-
-For support, email support@safestreet.com or join our [Discord community](https://discord.gg/safestreet).
-
-## 🔮 Roadmap
-
-- [ ] Mobile app development (React Native)
-- [ ] Advanced analytics with ML insights
-- [ ] Integration with municipal systems
-- [ ] Multi-language support
-- [ ] Offline capability
-- [ ] Advanced reporting features
-
----
-
-<div align="center">
-  <p>Made with ❤️ by the SafeStreet Team</p>
-  <p>
-    <a href="#top">Back to Top</a> •
-    <a href="https://github.com/your-username/safestreet/issues">Report Bug</a> •
-    <a href="https://github.com/your-username/safestreet/issues">Request Feature</a>
-  </p>
-</div>
